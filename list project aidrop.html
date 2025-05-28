@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Airdrop Daily Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6C5CE7;
+            --secondary: #A29BFE;
+            --dark: #2D3436;
+            --light: #F5F6FA;
+            --success: #00B894;
+            --danger: #D63031;
+            --warning: #FDCB6E;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--light);
+            color: var(--dark);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Auth Pages */
+        .auth-page {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+
+        .auth-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            padding: 40px;
+            text-align: center;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .auth-card h1 {
+            color: var(--primary);
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+
+        .auth-card input {
+            width: 100%;
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            border: 2px solid #eee;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .auth-card input:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+
+        .auth-card button {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .auth-card button:hover {
+            background: #5649D6;
+        }
+
+        .auth-card .switch-auth {
+            margin-top: 20px;
+            color: #666;
+        }
+
+        .auth-card .switch-auth a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .error-message {
+            color: var(--danger);
+            font-size: 14px;
+            margin-top: -15px;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        /* App Layout */
+        .app-container {
+            display: none;
+        }
+
+        .navbar {
+            background: white;
+            padding: 15px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .navbar-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 30px 0;
+        }
+
+        .date-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .current-date {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .add-project-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .add-project-btn:hover {
+            background: #5649D6;
+        }
+
+        /* Search & Filter */
+        .search-filter {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .search-box {
+            flex: 1;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 15px 12px 40px;
+            border: 2px solid #eee;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+        }
+
+        .filter-toggle {
+            background: white;
+            border: 2px solid #eee;
+            border-radius: 8px;
+            padding: 0 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Projects List */
+        .projects-list {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .project-item {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s;
+        }
+
+        .project-item:hover {
+            background: #fafafa;
+        }
+
+        .project-checkbox {
+            min-width: 20px;
+            height: 20px;
+            accent-color: var(--success);
+            cursor: pointer;
+        }
+
+        .project-info {
+            flex: 1;
+        }
+
+        .project-name {
+            font-weight: 500;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .project-link {
+            color: var(--primary);
+            font-size: 14px;
+            text-decoration: none;
+        }
+
+        .project-link:hover {
+            text-decoration: underline;
+        }
+
+        .project-date {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .project-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f5f5f5;
+            color: #666;
+            border: none;
+        }
+
+        .action-btn:hover {
+            background: #eee;
+        }
+
+        .delete-btn {
+            color: var(--danger);
+        }
+
+        /* Empty State */
+        .empty-state {
+            padding: 40px 20px;
+            text-align: center;
+            color: #666;
+        }
+
+        /* Add Project Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            width: 500px;
+            max-width: 90%;
+            padding: 30px;
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #eee;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: #5649D6;
+        }
+
+        .btn-outline {
+            background: none;
+            border: 2px solid #eee;
+        }
+
+        /* Check-in Section */
+        .checkin-section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .checkin-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 15px;
+        }
+
+        .date-picker {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .date-picker input {
+            padding: 10px;
+            border: 2px solid #eee;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .checkin-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .checkin-item {
+            background: #f9f9f9;
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .checkin-date {
+            font-weight: 500;
+            color: var(--primary);
+        }
+
+        .checkin-notes {
+            margin-top: 5px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .checkin-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .no-checkins {
+            color: #666;
+            text-align: center;
+            padding: 20px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .auth-card {
+                width: 90%;
+                padding: 30px 20px;
+            }
+
+            .search-filter {
+                flex-direction: column;
+            }
+
+            .date-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .checkin-controls {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Auth Pages -->
+    <div id="loginPage" class="auth-page">
+        <div class="auth-card">
+            <h1>Login</h1>
+            <form id="loginForm">
+                <div class="form-group">
+                    <input type="text" id="loginUsername" placeholder="Username" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="loginPassword" placeholder="Password" required>
+                    <p id="loginError" class="error-message"></p>
+                </div>
+                <button type="submit">Login</button>
+                <div class="switch-auth">
+                    Don't have an account? <a href="#" id="goToRegister">Register</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="registerPage" class="auth-page" style="display: none;">
+        <div class="auth-card">
+            <h1>Register</h1>
+            <form id="registerForm">
+                <div class="form-group">
+                    <input type="text" id="registerUsername" placeholder="Username" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="registerPassword" placeholder="Password" required>
+                    <p id="registerError" class="error-message"></p>
+                </div>
+                <button type="submit">Register</button>
+                <div class="switch-auth">
+                    Already have an account? <a href="#" id="goToLogin">Login</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- App Container -->
+    <div id="appContainer" class="app-container">
+        <nav class="navbar">
+            <div class="container navbar-content">
+                <div class="logo">Airdrop Tracker</div>
+                <div class="user-menu">
+                    <button id="logoutBtn" class="btn-outline">Logout</button>
+                    <div class="user-avatar" id="userAvatar">U</div>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container main-content">
+            <div class="date-header">
+                <h2 class="current-date" id="currentDate">Today, June 5, 2023</h2>
+                <button class="add-project-btn" id="addProjectBtn">
+                    <i class="fas fa-plus"></i> Add Project
+                </button>
+            </div>
+
+            <div class="search-filter">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Search projects...">
+                </div>
+                <div class="filter-toggle" id="filterToggle">
+                    <span>All</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+            </div>
+
+            <div class="projects-list" id="projectsList">
+                <!-- Projects will be loaded here -->
+            </div>
+
+            <!-- Daily Check-in Section -->
+            <div class="checkin-section">
+                <h3>Daily Check-in</h3>
+                <div class="checkin-controls">
+                    <button class="btn btn-primary" id="addCheckinBtn">
+                        <i class="fas fa-plus"></i> Add Today's Check-in
+                    </button>
+                    <div class="date-picker">
+                        <input type="date" id="checkinDateFilter">
+                        <button class="action-btn" id="searchCheckinBtn"><i class="fas fa-search"></i></button>
+                    </div>
+                </div>
+                <div class="checkin-list" id="checkinList">
+                    <!-- Check-ins will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Project Modal -->
+    <div class="modal" id="addProjectModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Add New Airdrop Project</h3>
+                <button class="close-modal" id="closeModal">&times;</button>
+            </div>
+            <form id="projectForm">
+                <div class="form-group">
+                    <label for="projectName">Project Name</label>
+                    <input type="text" id="projectName" class="form-control" placeholder="e.g., Starknet Airdrop" required>
+                </div>
+                <div class="form-group">
+                    <label for="projectLink">Project Link (Optional)</label>
+                    <input type="url" id="projectLink" class="form-control" placeholder="https://example.com/airdrop">
+                </div>
+            </form>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancelProject">Cancel</button>
+                <button class="btn btn-primary" id="saveProject">Save Project</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const loginPage = document.getElementById('loginPage');
+        const registerPage = document.getElementById('registerPage');
+        const appContainer = document.getElementById('appContainer');
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const goToRegister = document.getElementById('goToRegister');
+        const goToLogin = document.getElementById('goToLogin');
+        const loginError = document.getElementById('loginError');
+        const registerError = document.getElementById('registerError');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const userAvatar = document.getElementById('userAvatar');
+        const currentDate = document.getElementById('currentDate');
+        const addProjectBtn = document.getElementById('addProjectBtn');
+        const searchInput = document.getElementById('searchInput');
+        const filterToggle = document.getElementById('filterToggle');
+        const projectsList = document.getElementById('projectsList');
+        const addProjectModal = document.getElementById('addProjectModal');
+        const closeModal = document.getElementById('closeModal');
+        const cancelProject = document.getElementById('cancelProject');
+        const saveProject = document.getElementById('saveProject');
+        const projectForm = document.getElementById('projectForm');
+        const projectName = document.getElementById('projectName');
+        const projectLink = document.getElementById('projectLink');
+        const addCheckinBtn = document.getElementById('addCheckinBtn');
+        const checkinDateFilter = document.getElementById('checkinDateFilter');
+        const searchCheckinBtn = document.getElementById('searchCheckinBtn');
+        const checkinList = document.getElementById('checkinList');
+
+        // Data
+        let users = JSON.parse(localStorage.getItem('airdropUsers')) || [];
+        let projects = JSON.parse(localStorage.getItem('airdropProjects')) || {};
+        let checkins = JSON.parse(localStorage.getItem('airdropCheckins')) || {};
+        let currentUser = localStorage.getItem('airdropCurrentUser') || null;
+        let filterStatus = 'all'; // all, completed, active
+
+        // Initialize
+        function init() {
+            updateDate();
+            setupEventListeners();
+            checkAuth();
+        }
+
+        function updateDate() {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            currentDate.textContent = new Date().toLocaleDateString('en-US', options);
+            checkinDateFilter.valueAsDate = new Date(); // Set default date to today
+        }
+
+        function setupEventListeners() {
+            // Auth
+            goToRegister.addEventListener('click', (e) => {
+                e.preventDefault();
+                loginPage.style.display = 'none';
+                registerPage.style.display = 'flex';
+            });
+
+            goToLogin.addEventListener('click', (e) => {
+                e.preventDefault();
+                registerPage.style.display = 'none';
+                loginPage.style.display = 'flex';
+            });
+
+            loginForm.addEventListener('submit', handleLogin);
+            registerForm.addEventListener('submit', handleRegister);
+            logoutBtn.addEventListener('click', handleLogout);
+
+            // Projects
+            addProjectBtn.addEventListener('click', () => {
+                addProjectModal.style.display = 'flex';
+                projectName.focus();
+            });
+
+            closeModal.addEventListener('click', closeModalHandler);
+            cancelProject.addEventListener('click', closeModalHandler);
+
+            saveProject.addEventListener('click', handleAddProject);
+
+            searchInput.addEventListener('input', filterProjects);
+            filterToggle.addEventListener('click', toggleFilter);
+            
+            // Check-ins
+            addCheckinBtn.addEventListener('click', addTodayCheckin);
+            searchCheckinBtn.addEventListener('click', filterCheckinsByDate);
+            
+            // Close modal when clicking outside
+            window.addEventListener('click', (e) => {
+                if (e.target === addProjectModal) {
+                    closeModalHandler();
+                }
+            });
+        }
+
+        function closeModalHandler() {
+            addProjectModal.style.display = 'none';
+            projectForm.reset();
+        }
+
+        function checkAuth() {
+            if (currentUser) {
+                loginPage.style.display = 'none';
+                registerPage.style.display = 'none';
+                appContainer.style.display = 'block';
+                userAvatar.textContent = currentUser.charAt(0).toUpperCase();
+                loadProjects();
+                loadCheckins();
+            } else {
+                loginPage.style.display = 'flex';
+                registerPage.style.display = 'none';
+                appContainer.style.display = 'none';
+            }
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+
+            const user = users.find(u => u.username === username && u.password === password);
+
+            if (user) {
+                currentUser = username;
+                localStorage.setItem('airdropCurrentUser', username);
+                loginError.textContent = '';
+                checkAuth();
+            } else {
+                loginError.textContent = 'Invalid username or password';
+            }
+        }
+
+        function handleRegister(e) {
+            e.preventDefault();
+            const username = document.getElementById('registerUsername').value.trim();
+            const password = document.getElementById('registerPassword').value.trim();
+
+            if (username.length < 3) {
+                registerError.textContent = 'Username must be at least 3 characters';
+                return;
+            }
+
+            if (password.length < 6) {
+                registerError.textContent = 'Password must be at least 6 characters';
+                return;
+            }
+
+            if (users.some(u => u.username === username)) {
+                registerError.textContent = 'Username already exists';
+                return;
+            }
+
+            users.push({ username, password });
+            localStorage.setItem('airdropUsers', JSON.stringify(users));
+            registerError.textContent = '';
+
+            // Auto login after register
+            currentUser = username;
+            localStorage.setItem('airdropCurrentUser', username);
+            checkAuth();
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            localStorage.removeItem('airdropCurrentUser');
+            checkAuth();
+        }
+
+        function handleAddProject() {
+            const name = projectName.value.trim();
+            const link = projectLink.value.trim();
+
+            if (!name) {
+                alert('Project name is required');
+                return;
+            }
+
+            if (!projects[currentUser]) {
+                projects[currentUser] = [];
+            }
+
+            const newProject = {
+                id: Date.now(),
+                name,
+                link: link || null,
+                dateAdded: new Date().toISOString(),
+                completed: false,
+                lastUpdated: new Date().toISOString()
+            };
+
+            projects[currentUser].unshift(newProject);
+            localStorage.setItem('airdropProjects', JSON.stringify(projects));
+
+            closeModalHandler();
+            loadProjects();
+        }
+
+        function loadProjects() {
+            if (!currentUser || !projects[currentUser] || projects[currentUser].length === 0) {
+                projectsList.innerHTML = '<div class="empty-state">No projects yet. Click "Add Project" to get started!</div>';
+                return;
+            }
+
+            let filteredProjects = [...projects[currentUser]];
+
+            // Apply search filter
+            const searchTerm = searchInput.value.toLowerCase();
+            if (searchTerm) {
+                filteredProjects = filteredProjects.filter(project => 
+                    project.name.toLowerCase().includes(searchTerm)
+                );
+            }
+
+            // Apply status filter
+            if (filterStatus === 'completed') {
+                filteredProjects = filteredProjects.filter(project => project.completed);
+            } else if (filterStatus === 'active') {
+                filteredProjects = filteredProjects.filter(project => !project.completed);
+            }
+
+            if (filteredProjects.length === 0) {
+                projectsList.innerHTML = '<div class="empty-state">No projects match your criteria</div>';
+                return;
+            }
+
+            projectsList.innerHTML = filteredProjects.map(project => `
+                <div class="project-item" data-id="${project.id}">
+                    <input type="checkbox" class="project-checkbox" ${project.completed ? 'checked' : ''}>
+                    <div class="project-info">
+                        <div class="project-name">
+                            ${project.completed ? `<s>${project.name}</s>` : project.name}
+                            ${project.link ? `<a href="${project.link}" target="_blank" class="project-link" title="Open link"><i class="fas fa-external-link-alt"></i></a>` : ''}
+                        </div>
+                        <div class="project-date">
+                            Added: ${formatDate(project.dateAdded)} | 
+                            Last updated: ${formatDate(project.lastUpdated || project.dateAdded)}
+                        </div>
+                    </div>
+                    <div class="project-actions">
+                        <button class="action-btn delete-btn" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            // Add event listeners to checkboxes
+            document.querySelectorAll('.project-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const projectId = parseInt(this.closest('.project-item').getAttribute('data-id'));
+                    const projectIndex = projects[currentUser].findIndex(p => p.id === projectId);
+                    
+                    projects[currentUser][projectIndex].completed = this.checked;
+                    projects[currentUser][projectIndex].lastUpdated = new Date().toISOString();
+                    
+                    localStorage.setItem('airdropProjects', JSON.stringify(projects));
+                    loadProjects();
+                });
+            });
+
+            // Add event listeners to delete buttons
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    if (confirm('Are you sure you want to delete this project?')) {
+                        const projectId = parseInt(this.closest('.project-item').getAttribute('data-id'));
+                        projects[currentUser] = projects[currentUser].filter(p => p.id !== projectId);
+                        localStorage.setItem('airdropProjects', JSON.stringify(projects));
+                        loadProjects();
+                    }
+                });
+            });
+        }
+
+        // Check-in functions
+        function addTodayCheckin() {
+            const today = new Date().toISOString().split('T')[0];
+            const notes = prompt("Add notes for today's check-in (optional):");
+            
+            if (!checkins[currentUser]) {
+                checkins[currentUser] = [];
+            }
+            
+            // Cek apakah sudah ada check-in hari ini
+            const existingIndex = checkins[currentUser].findIndex(c => c.date === today);
+            
+            if (existingIndex >= 0) {
+                if (notes !== null) { // Only update if user didn't cancel
+                    checkins[currentUser][existingIndex].notes = notes || '';
+                    checkins[currentUser][existingIndex].timestamp = new Date().toISOString();
+                    localStorage.setItem('airdropCheckins', JSON.stringify(checkins));
+                    loadCheckins();
+                }
+            } else {
+                if (notes !== null) { // Only add if user didn't cancel
+                    checkins[currentUser].unshift({
+                        date: today,
+                        notes: notes || '',
+                        timestamp: new Date().toISOString()
+                    });
+                    localStorage.setItem('airdropCheckins', JSON.stringify(checkins));
+                    loadCheckins();
+                }
+            }
+        }
+
+        function loadCheckins(filterDate = null) {
+            if (!currentUser || !checkins[currentUser] || checkins[currentUser].length === 0) {
+                checkinList.innerHTML = '<div class="no-checkins">No check-ins yet. Add your first check-in!</div>';
+                return;
+            }
+            
+            let filteredCheckins = [...checkins[currentUser]];
+            
+            if (filterDate) {
+                filteredCheckins = filteredCheckins.filter(c => c.date === filterDate);
+            }
+            
+            if (filteredCheckins.length === 0) {
+                checkinList.innerHTML = '<div class="no-checkins">No check-ins found for selected date</div>';
+                return;
+            }
+            
+            checkinList.innerHTML = filteredCheckins.map(checkin => `
+                <div class="checkin-item" data-date="${checkin.date}">
+                    <div>
+                        <div class="checkin-date">${formatFullDate(checkin.date)}</div>
+                        ${checkin.notes ? `<div class="checkin-notes">${checkin.notes}</div>` : ''}
+                    </div>
+                    <div class="checkin-actions">
+                        <button class="action-btn delete-checkin-btn" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Add event listeners to delete buttons
+            document.querySelectorAll('.delete-checkin-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    if (confirm('Delete this check-in?')) {
+                        const checkinDate = this.closest('.checkin-item').getAttribute('data-date');
+                        checkins[currentUser] = checkins[currentUser].filter(c => c.date !== checkinDate);
+                        localStorage.setItem('airdropCheckins', JSON.stringify(checkins));
+                        loadCheckins();
+                    }
+                });
+            });
+        }
+
+        function filterCheckinsByDate() {
+            const date = document.getElementById('checkinDateFilter').value;
+            loadCheckins(date || null);
+        }
+
+        // Helper functions
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function formatFullDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+
+        function filterProjects() {
+            loadProjects();
+        }
+
+        function toggleFilter() {
+            const statuses = ['all', 'active', 'completed'];
+            const currentIndex = statuses.indexOf(filterStatus);
+            filterStatus = statuses[(currentIndex + 1) % statuses.length];
+            filterToggle.querySelector('span').textContent = filterStatus.charAt(0).toUpperCase() + filterStatus.slice(1);
+            loadProjects();
+        }
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
